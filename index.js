@@ -1,3 +1,12 @@
+const express=require('express');   
+const dotenv=require('dotenv');
+const cors=require('cors');
+const mongoose=require('mongoose');
+const bodyParser=require('body-parser');
+const http=require('http');
+const { Server } = require('socket.io');
+dotenv.config();
+
 const yargs=require('yargs');
 const {hideBin}=require('yargs/helpers');  //to read commands with spaces in them, like "node index.js add --title='My Title' --body='My Body'"
 const {initRepo}=require('./controllers/init');
@@ -28,6 +37,63 @@ yargs(hideBin(process.argv))           //reads the commands and extracts the arg
     type:"string",
     demandOption:true
 })},revertChanges)
+.command("start", "Start backend server", {}, startServer)
 .demandCommand(1,"Please provide a valid command") //ensures that at least one command is provided, otherwise shows the message
 .help()  //to show the help message when the user types "node index.js --help"
 .argv;   //to parse the arguments and execute the command
+
+
+function startServer() {
+  const app = express();
+  const port = process.env.PORT || 3000;
+
+  app.use(bodyParser.json());
+  app.use(express.json());
+
+  const mongoURI = process.env.MONGODB_URI;
+
+  mongoose
+    .connect(mongoURI)
+    .then(() => console.log("MongoDB connected!"))
+    .catch((err) => console.error("Unable to connect : ", err));
+
+  app.use(cors({ origin: "*" }));
+
+//   app.use("/", mainRouter);
+
+  let user = "test";
+  const httpServer = http.createServer(app);
+  const io = new Server(httpServer, {
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"],
+    },
+  });
+
+  app.get("/", (req, res) => {
+  res.send("Version Control System API is running");
+});
+
+
+
+  io.on("connection", (socket) => {
+    socket.on("joinRoom", (userID) => {
+      user = userID;
+      console.log("=====");
+      console.log(user);
+      console.log("=====");
+      socket.join(userID);
+    });
+  });
+
+  const db = mongoose.connection;
+
+  db.once("open", async () => {
+    console.log("CRUD operations called");
+    // CRUD operations
+  });
+
+  httpServer.listen(port, () => {
+    console.log(`Server is running on PORT ${port}`);
+  });
+}
