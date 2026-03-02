@@ -5,6 +5,7 @@ const mongoose=require('mongoose');
 const bodyParser=require('body-parser');
 const http=require('http');
 const { Server } = require('socket.io');
+const mainRouter=require('./routes/main.router');
 dotenv.config();
 
 const yargs=require('yargs');
@@ -59,7 +60,7 @@ function startServer() {
 
   app.use(cors({ origin: "*" }));
 
-//   app.use("/", mainRouter);
+  app.use("/", mainRouter);
 
   let user = "test";
   const httpServer = http.createServer(app);
@@ -69,11 +70,6 @@ function startServer() {
       methods: ["GET", "POST"],
     },
   });
-
-  app.get("/", (req, res) => {
-  res.send("Version Control System API is running");
-});
-
 
 
   io.on("connection", (socket) => {
