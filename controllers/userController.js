@@ -11,10 +11,11 @@ let client;
 
 async function connectClient() {
   if (!client) {
-    client = new MongoClient(uri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    client = new MongoClient(uri
+    //   useNewUrlParser: true,
+    //   useUnifiedTopology: true,
+    // }
+    );
     await client.connect();
   }
 }
@@ -45,12 +46,13 @@ async function signup(req, res) {
 
     const result = await usersCollection.insertOne(newUser);
 
+    const insertedId = result.insertedId;
     const token = jwt.sign(
-      { id: result.insertId },
+      { id: insertedId },
       process.env.JWT_SECRET_KEY,
       { expiresIn: "1h" }
     );
-    res.json({ token, userId: result.insertId });
+    res.json({ token, userId: insertedId });
   } catch (err) {
     console.error("Error during signup : ", err.message);
     res.status(500).send("Server error");

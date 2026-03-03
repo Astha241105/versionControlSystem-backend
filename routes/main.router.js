@@ -1,13 +1,14 @@
 const express = require("express");
-const userController = require("../controllers/userController");
 
-const userRouter = express.Router();
+const userRouter = require("./user.router");
+const repoRouter = require("./repo.router");
+const issueRouter = require("./issue.router");
 
-userRouter.get("/allUsers", userController.getAllUsers);
-userRouter.post("/signup", userController.signup);
-userRouter.post("/login", userController.login);
-userRouter.get("/userProfile/:id", userController.getUserProfile);
-userRouter.put("/updateProfile/:id", userController.updateUserProfile);
-userRouter.delete("/deleteProfile/:id", userController.deleteUserProfile);
+const mainRouter = express.Router();
 
-module.exports = userRouter;
+// keep routes unprefixed (e.g. /login, /repo/all)
+mainRouter.use("/", userRouter);
+mainRouter.use("/", repoRouter);
+mainRouter.use("/", issueRouter);
+
+module.exports = mainRouter;

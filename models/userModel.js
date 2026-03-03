@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
-const UserSchema = new Schema({
-  timestamps: true,
+const UserSchema = new Schema(
+  {
   username: {
     type: String,
     required: true,
@@ -18,26 +18,29 @@ const UserSchema = new Schema({
   },
   repositories: [
     {
-      default: [],
       type: Schema.Types.ObjectId,
       ref: "Repository",
     },
   ],
   followedUsers: [
     {
-      default: [],
       type: Schema.Types.ObjectId,
       ref: "User",
     },
   ],
   starRepos: [
     {
-      default: [],
       type: Schema.Types.ObjectId,
       ref: "Repository",
     },
   ],
-});
+  },
+  { timestamps: true }
+);
+
+UserSchema.path("repositories").default(() => []);
+UserSchema.path("followedUsers").default(() => []);
+UserSchema.path("starRepos").default(() => []);
 
 const User = mongoose.model("User", UserSchema);
 
